@@ -31,32 +31,9 @@ class Shoe:
         self.cost = cost
         self.quantity = quantity
 
-    def get_code(self):
-        """
-        Gets the shoe SKU code.
-
-        :return: Shoe code
-        :rtype: str
-        """
-        return self.code
-
-    def get_cost(self):
-        """
-        Gets the cost of the shoe.
-
-        :return: Cost of the shoe
-        :rtype: int
-        """
-        return self.cost
-
-    def get_quantity(self):
-        """
-        Gets the amount of the shoe at the location.
-
-        :return: Quantity of the shoe
-        :rtype: int
-        """
-        return self.quantity
+    @property
+    def value(self):
+        return self.cost * self.quantity
 
     def add_quantity(self, quantity_to_add: int):
         self.quantity += quantity_to_add
@@ -203,7 +180,7 @@ def re_stock(shoes: list[Shoe]):
     """
     lowest_quantity_product = min(
         shoes,
-        key=lambda shoe: shoe.get_quantity(),
+        key=lambda shoe: shoe.quantity,
         default=None,
     )
     if not lowest_quantity_product:
@@ -262,7 +239,7 @@ def search_shoe(shoes: list[Shoe]):
             shoe_found = False
             target_shoe = None
             for shoe in shoes:
-                if user_input == shoe.get_code():
+                if user_input == shoe.code:
                     shoe_found = True
                     target_shoe = shoe
             if shoe_found:
@@ -293,7 +270,7 @@ def value_per_item(shoes: list[Shoe]):
     """
     print("Value per item for all shoes...")
     for shoe in shoes:
-        value = shoe.get_cost() * shoe.get_quantity()
+        value = shoe.value
         print(shoe, end="")
         print(f"\tValue:      {value:,}", end="\n\n")
 
@@ -308,7 +285,7 @@ def highest_qty(shoes: list[Shoe]):
     print("Shoe with the highest quantity in stock...")
     highest_quantity_product = max(
         shoes,
-        key=lambda shoe: shoe.get_quantity(),
+        key=lambda shoe: shoe.quantity,
         default=None,
     )
     if not highest_quantity_product:
