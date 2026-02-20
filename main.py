@@ -335,47 +335,53 @@ MENU_RESTOCK = 4
 MENU_VALUE_PER = 5
 MENU_HIGHEST_QUANTITY = 6
 
+
 # ==========Main Menu=============
-print("Shoe Inventory Program")
+def main():
+    print("Shoe Inventory Program")
 
-shoes = read_shoes_data()
+    shoes = read_shoes_data()
 
-while True:
     while True:
-        try:
-            user_choice = int(
-                input(
-                    """\nPlease select from the following menu:
-\t1) View whole inventory
-\t2) Search for a shoe in inventory using SKU code
-\t3) Input new shoe detail into inventory
-\t4) Restock the lowest quantity of a shoe in inventory
-\t5) View value per item for the whole inventory
-\t6) View highest quantity of a shoe in inventory
+        while True:
+            try:
+                user_choice = int(
+                    input(
+                        """\nPlease select from the following menu:
+    \t1) View whole inventory
+    \t2) Search for a shoe in inventory using SKU code
+    \t3) Input new shoe detail into inventory
+    \t4) Restock the lowest quantity of a shoe in inventory
+    \t5) View value per item for the whole inventory
+    \t6) View highest quantity of a shoe in inventory
 
-\t0) Quit program
+    \t0) Quit program
 
-\tEnter selection: """,
-                ),
-            )
+    \tEnter selection: """,
+                    ),
+                )
+                break
+            except ValueError:
+                print("\nEnter a number from the list, please try again...")
+
+        if user_choice == MENU_VIEW_ALL:
+            view_all(shoes)
+        elif user_choice == MENU_SEARCH:
+            search_shoe(shoes)
+        elif user_choice == MENU_INPUT_NEW_SHOE:
+            capture_shoes(shoes)
+        elif user_choice == MENU_RESTOCK:
+            re_stock(shoes)
+        elif user_choice == MENU_VALUE_PER:
+            value_per_item(shoes)
+        elif user_choice == MENU_HIGHEST_QUANTITY:
+            highest_qty(shoes)
+        elif user_choice == 0:
+            print("\nThank you for using the Shoe Inventory Program!")
             break
-        except ValueError:
-            print("\nEnter a number from the list, please try again...")
+        else:
+            print("Please enter a number from the menu list, try again...")
 
-    if user_choice == MENU_VIEW_ALL:
-        view_all(shoes)
-    elif user_choice == MENU_SEARCH:
-        search_shoe(shoes)
-    elif user_choice == MENU_INPUT_NEW_SHOE:
-        capture_shoes(shoes)
-    elif user_choice == MENU_RESTOCK:
-        re_stock(shoes)
-    elif user_choice == MENU_VALUE_PER:
-        value_per_item(shoes)
-    elif user_choice == MENU_HIGHEST_QUANTITY:
-        highest_qty(shoes)
-    elif user_choice == 0:
-        print("\nThank you for using the Shoe Inventory Program!")
-        break
-    else:
-        print("Please enter a number from the menu list, try again...")
+
+if __name__ == "__main__":
+    main()
