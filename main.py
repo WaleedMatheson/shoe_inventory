@@ -49,259 +49,227 @@ class Shoe:
         )
 
 
-# ==========Functions outside the class==============
-def read_shoes_data():
-    """
-    Open the inventory file and read its contents and populate the shoe list variable.
+class Inventory:
+    """Blueprint for the shoe inventory."""
 
-    There is also some logic to prevent a FileNotFoundError and to prevent some errors in
-    the inventory file.
+    def __init__(self, file_path: Path):
+        """
+        Initialise the Inventory class.
 
-    :return: Returns list of shoe objects from the inventory
-    :rtype: list[Shoe]
-    """
-    shoes = []
-    check_file_formatting = False
+        :param file_path: Path object of the inventory file path
+        :type file_path: Path
+        """
+        self.file_path = file_path
+        self.shoes: list[Shoe] = []
 
-    try:
-        with Path.open(INVENTORY_PATH) as inv_file:
-            # Using readline() to skip the header and at the same time get the number of columns in the file
-            num_of_inv_columns = len(inv_file.readline().split(","))
-            for item in inv_file:
-                item_list = item.strip("\n").split(",")
+    def load_data(self):
+        has_formatting_errors = False
 
-                # Skip if not enough columns of data to avoid error,
-                # then at the end of function let the user know
-                if len(item_list) != num_of_inv_columns:
-                    check_file_formatting = True
-                    continue
+        try:
+            with Path.open(self.file_path) as inv_file:
+                # Using readline() to skip the header and at the same time get the number of columns in the file
+                num_of_inv_columns = len(inv_file.readline().split(","))
+                for item in inv_file:
+                    item_list = item.strip("\n").split(",")
 
-                shoe = Shoe(
-                    country=item_list[0],
-                    code=item_list[1],
-                    product=item_list[2],
-                    cost=int(item_list[3]),
-                    quantity=int(item_list[4]),
-                )
-                shoes.append(shoe)
-    except FileNotFoundError:
-        inventory_not_found_exit()
+                    # Skip if not enough columns of data to avoid error,
+                    # then at the end of function let the user know
+                    if len(item_list) != num_of_inv_columns:
+                        has_formatting_errors = True
+                        continue
 
-    if check_file_formatting:
-        print("\n!!! Check inventory file for incorrect formatting !!!\n")
+                    shoe = Shoe(
+                        country=item_list[0],
+                        code=item_list[1],
+                        product=item_list[2],
+                        cost=int(item_list[3]),
+                        quantity=int(item_list[4]),
+                    )
+                    self.shoes.append(shoe)
+        except FileNotFoundError:
+            self.file_not_found_exit()
 
-    return shoes
+        if has_formatting_errors:
+            print("\n!!! Check inventory file for incorrect formatting !!!\n")
 
-
-def capture_shoes(shoes: list[Shoe]):
-    """
-    Ask the user for 5 inputs; country, code, product, cost, and quantity to add a Shoe object to the shoe list.
-
-    :param shoes: List of shoe objects
-    :type shoes: list[Shoe]
-    """
-    while True:
-        print("\nPlease enter shoe details...")
-        country = input("Country: ")
-        code = input("Code: SKU")
-        code = f"SKU{code}"
-        product = input("Product Name: ")
-
-        # This logic will make sure only an int value is entered for cost and quantity
-        while True:
-            try:
-                cost = int(input("Cost: "))
-                quantity = int(input("Quantity: "))
-                break
-            except ValueError:
-                print("Enter a number value for cost and quantity. Try again...\n")
-
-        print("You've entered the following details...")
-        print(f"""\tCountry:    {country}
-\tCode:       {code}
-\tProduct:    {product}
-\tCost:       {cost}
-\tQuantity:   {quantity}
-""")
-        # This loop is logic to give the user a chance to redo the details if any entered details are incorrect
-        while True:
-            user_input = input("Are these shoe details correct? (y/n): ")
-            if user_input.lower() == "y":
-                shoe = Shoe(
-                    country=country,
-                    code=code,
-                    product=product,
-                    cost=cost,
-                    quantity=quantity,
-                )
-                shoes.append(shoe)
-
-                # Append shoe to the inventory file
-                try:
-                    with Path.open(INVENTORY_PATH, "a") as inv_file:
-                        inv_file.write(
-                            f"{country},{code},{product},{cost},{quantity}\n",
-                        )
-                except FileNotFoundError:
-                    inventory_not_found_exit()
-
-                print(
-                    f"\nNew product: {product} with code {code} entered into inventory\n"
-                    "Inventory file updated...",
-                )
-                return
-            if user_input.lower() == "n":
-                break
-            print("Try again...\n")
-
-
-def view_all(shoes: list[Shoe]):
-    """
-    Print out all the shoes in the shoe list.
-
-    Relying on the string representation of the Shoe object.
-
-    :param shoes: List of shoe objects
-    :type shoes: list[Shoe]
-    """
-    print("All shoes in the list...")
-    for shoe in shoes:
-        print(shoe)
-
-
-def re_stock(shoes: list[Shoe]):
-    """
-    Prints the shoe with the lowest quantity in the inventory and asks user for quantity input.
-
-    Updates the inventory file.
-
-    :param shoes: List of shoe objects
-    :type shoes: list[Shoe]
-    """
-    lowest_quantity_product = min(
-        shoes,
-        key=lambda shoe: shoe.quantity,
-        default=None,
-    )
-    if not lowest_quantity_product:
-        inventory_not_found_exit()
-
-    print(
-        f"The shoe product with the lowest quantity in stock is...\n{lowest_quantity_product}\n",
-    )
-
-    while True:
-        user_input = input("Would you like to add quantity? (y/n): ")
-        if user_input.lower() == "y":
-            try:
-                quantity_to_add = int(input("How much would you like to add: "))
-                lowest_quantity_product.add_quantity(quantity_to_add)
-                break
-            except ValueError:
-                print("Enter a number value for the restock. Try again...\n")
-        elif user_input.lower() == "n":
-            break
-        else:
-            print("Try again...\n")
-
-    print("\nNew details...")
-    print(lowest_quantity_product)
-
-    # Write the new shoe, including all other shoes into the inventory file
-    try:
-        with Path.open(INVENTORY_PATH, "w") as inv_file:
+    def save_data(self):
+        """Save current shoes list to a file."""
+        with Path.open(self.file_path, "w") as inv_file:
             inv_file.write("Country,Code,Product,Cost,Quantity\n")
-            for shoe in shoes:
+            for shoe in self.shoes:
                 inv_file.write(
                     f"{shoe.country},{shoe.code},{shoe.product},{shoe.cost},{shoe.quantity}\n",
                 )
-    except FileNotFoundError:
-        inventory_not_found_exit()
 
-    print("Inventory file updated...")
+    def view_all(self):
+        """
+        Print out all the shoes in the shoe list.
 
+        Relying on the string representation of the Shoe object.
+        """
+        print("All shoes in the list...")
+        for shoe in self.shoes:
+            print(shoe)
 
-def search_shoe(shoes: list[Shoe]):
-    """
-    Search for a shoe using the shoe code.
-
-    :param shoes: List of shoe objects
-    :type shoes: list[Shoe]
-    """
-    # Looping for the ability to search again instead of going back to the main menu
-    while True:
+    def capture_shoes(self):
+        """Ask the user for 5 inputs; country, code, product, cost, and quantity to add a Shoe object to the shoe list."""
         while True:
+            print("\nPlease enter shoe details...")
+            country = input("\tCountry: ")
+            code = input("\tCode: SKU")
+            code = f"SKU{code}"
+            product = input("\tProduct Name: ")
+
+            # This logic will make sure only an int value is entered for cost and quantity
+            while True:
+                try:
+                    cost = int(input("\tCost: "))
+                    quantity = int(input("\tQuantity: "))
+                    break
+                except ValueError:
+                    print("Enter a number value for cost and quantity. Try again...\n")
+
+            print("\nYou've entered the following details...")
             print(
-                "\nEnter shoe code for the shoe details you're after...",
+                f"\tCountry:    {country}\n"
+                f"\tCode:       {code}\n"
+                f"\tProduct:    {product}\n"
+                f"\tCost:       {cost}\n"
+                f"\tQuantity:   {quantity}\n",
             )
-            user_input = input("Code: SKU")
-            user_input = f"SKU{user_input}"
-            shoe_found = False
-            target_shoe = None
-            for shoe in shoes:
-                if user_input == shoe.code:
-                    shoe_found = True
-                    target_shoe = shoe
-            if shoe_found:
-                print("Search result:")
-                print(target_shoe)
-                break
+            # This loop is logic to give the user a chance to redo the details if any entered details are incorrect
+            while True:
+                user_input = input("Are these shoe details correct? (y/n): ")
+                if user_input.lower() == "y":
+                    shoe = Shoe(
+                        country=country,
+                        code=code,
+                        product=product,
+                        cost=cost,
+                        quantity=quantity,
+                    )
+                    self.shoes.append(shoe)
 
-            print("\nShoe code not in the inventory list...")
+                    # Append shoe to the inventory file
+                    self.save_data()
+
+                    print(
+                        f"\nNew product: {product} with code {code} entered into inventory\n"
+                        "Inventory file updated...",
+                    )
+                    return
+                if user_input.lower() == "n":
+                    break
+                print("Try again...\n")
+
+    def re_stock(self):
+        """
+        Prints the shoe with the lowest quantity in the inventory and asks user for quantity input.
+
+        Updates the inventory file.
+        """
+        lowest_quantity_product = min(
+            self.shoes,
+            key=lambda shoe: shoe.quantity,
+            default=None,
+        )
+        if not lowest_quantity_product:
+            self.file_not_found_exit()
+
+        print(
+            f"The shoe product with the lowest quantity in stock is...\n{lowest_quantity_product}\n",
+        )
 
         while True:
-            # Logic to ask if the user wants to search again
-            user_input = input("\nWould you like to search again? (y/n): ")
+            user_input = input("Would you like to add quantity? (y/n): ")
             if user_input.lower() == "y":
+                try:
+                    quantity_to_add = int(input("How much would you like to add: "))
+                    lowest_quantity_product.add_quantity(quantity_to_add)
+                    break
+                except ValueError:
+                    print("Enter a number value for the restock. Try again...\n")
+            elif user_input.lower() == "n":
                 break
-            if user_input.lower() == "n":
-                return
-            print("Try again...\n")
+            else:
+                print("Try again...\n")
+
+        print("\nNew details...")
+        print(lowest_quantity_product)
+
+        # Write the new shoe to the inventory file
+        self.save_data()
+
+        print("Inventory file updated...")
+
+    def search_shoe(self):
+        """Search for a shoe using the shoe code."""
+        # Looping for the ability to search again instead of going back to the main menu
+        while True:
+            while True:
+                print(
+                    "\nEnter shoe code for the shoe details you're after...",
+                )
+                user_input = input("Code: SKU")
+                user_input = f"SKU{user_input}"
+                shoe_found = False
+                target_shoe = None
+                for shoe in self.shoes:
+                    if user_input == shoe.code:
+                        shoe_found = True
+                        target_shoe = shoe
+                if shoe_found:
+                    print("Search result:")
+                    print(target_shoe)
+                    break
+
+                print("\nShoe code not in the inventory list...")
+
+            while True:
+                # Logic to ask if the user wants to search again
+                user_input = input("\nWould you like to search again? (y/n): ")
+                if user_input.lower() == "y":
+                    break
+                if user_input.lower() == "n":
+                    return
+                print("Try again...\n")
+
+    def value_per_item(self):
+        """
+        Print all the shoes out with an added detail for the value of each shoe.
+
+        Value = Cost * Quantity
+        """
+        print("Value per item for all shoes...")
+        for shoe in self.shoes:
+            value = shoe.value
+            print(shoe, end="")
+            print(f"\tValue:      {value:,}", end="\n\n")
+
+    def highest_qty(self):
+        """View the highest quantity shoe in the inventory."""
+        print("Shoe with the highest quantity in stock...")
+        highest_quantity_product = max(
+            self.shoes,
+            key=lambda shoe: shoe.quantity,
+            default=None,
+        )
+        if not highest_quantity_product:
+            self.file_not_found_exit()
+
+        print(highest_quantity_product)
+        print(f"\n{highest_quantity_product.product} is now for sale!")
+
+    def file_not_found_exit(self):
+        """Print the error for path file not found and then exit the program."""
+        print(
+            f"\n\t{self.file_path.name} not found, please fix and run this program again"
+            "\n\tProgram shutting down...",
+        )
+        sys.exit()
 
 
-def value_per_item(shoes: list[Shoe]):
-    """
-    Print all the shoes out with an added detail for the value of each shoe.
-
-    Value = Cost * Quantity
-
-    :param shoes: List of shoe objects
-    :type shoes: list[Shoe]
-    """
-    print("Value per item for all shoes...")
-    for shoe in shoes:
-        value = shoe.value
-        print(shoe, end="")
-        print(f"\tValue:      {value:,}", end="\n\n")
-
-
-def highest_qty(shoes: list[Shoe]):
-    """
-    View the highest quantity shoe in the inventory.
-
-    :param shoes: List of shoe objects
-    :type shoes: list[Shoe]
-    """
-    print("Shoe with the highest quantity in stock...")
-    highest_quantity_product = max(
-        shoes,
-        key=lambda shoe: shoe.quantity,
-        default=None,
-    )
-    if not highest_quantity_product:
-        inventory_not_found_exit()
-
-    print(highest_quantity_product)
-    print(f"\n{highest_quantity_product.product} is now for sale!")
-
-
-def inventory_not_found_exit():
-    """Print the error for inventory file not found and then exit the program."""
-    print(
-        "\n\tInventory file not found, please add it and run this program again"
-        "\n\tProgram shutting down...",
-    )
-    sys.exit()
+# ==========Functions outside the class==============
 
 
 # Menu Constants
@@ -317,7 +285,8 @@ MENU_HIGHEST_QUANTITY = 6
 def main():
     print("Shoe Inventory Program")
 
-    shoes = read_shoes_data()
+    inventory = Inventory(INVENTORY_PATH)
+    inventory.load_data()
 
     while True:
         while True:
@@ -342,17 +311,17 @@ def main():
                 print("\nEnter a number from the list, please try again...")
 
         if user_choice == MENU_VIEW_ALL:
-            view_all(shoes)
+            inventory.view_all()
         elif user_choice == MENU_SEARCH:
-            search_shoe(shoes)
+            inventory.search_shoe()
         elif user_choice == MENU_INPUT_NEW_SHOE:
-            capture_shoes(shoes)
+            inventory.capture_shoes()
         elif user_choice == MENU_RESTOCK:
-            re_stock(shoes)
+            inventory.re_stock()
         elif user_choice == MENU_VALUE_PER:
-            value_per_item(shoes)
+            inventory.value_per_item()
         elif user_choice == MENU_HIGHEST_QUANTITY:
-            highest_qty(shoes)
+            inventory.highest_qty()
         elif user_choice == 0:
             print("\nThank you for using the Shoe Inventory Program!")
             break
