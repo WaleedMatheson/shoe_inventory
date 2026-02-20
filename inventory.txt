@@ -1,5 +1,5 @@
 Country,Code,Product,Cost,Quantity
-China,SKU90000,Jordan 1,3200,50
+China,SKU90000,Jordan 1,9200,50
 Vietnam,SKU63221,Blazer,1700,19
 United States,SKU29077,Cortez,970,60
 Russia,SKU89999,Air Force 1,2000,43

@@ -39,14 +39,8 @@ class Shoe:
         self.quantity += quantity_to_add
 
     def __str__(self):
-        """String representation of the shoe class."""
-        return (
-            f"\tProduct:    {self.product}\n"
-            f"\tCode:       {self.code}\n"
-            f"\tQuantity:   {self.quantity}\n"
-            f"\tCost:       {self.cost}\n"
-            f"\tCountry:    {self.country}\n"
-        )
+        """String representation of the shoe class as a table row."""
+        return f"| {self.country:<20} | {self.code:<9} | {self.product:<25} | {self.cost:>6} | {self.quantity:>4} | {self.value:>9,} |"
 
 
 class Inventory:
@@ -107,9 +101,14 @@ class Inventory:
 
         Relying on the string representation of the Shoe object.
         """
-        print("All shoes in the list...")
+        header = f"| {'Country':<20} | {'Code':<9} | {'Product Name':<25} | {'Cost':<6} | {'Qty':<4} | {'Value':<9} |"
+        table_width = len(header)
+        print("_" * table_width)
+        print(header)
+        print("-" * table_width)
         for shoe in self.shoes:
             print(shoe)
+        print("-" * table_width)
 
     def capture_shoes(self):
         """Ask the user for 5 inputs; country, code, product, cost, and quantity to add a Shoe object to the shoe list."""
@@ -234,18 +233,6 @@ class Inventory:
                     return
                 print("Try again...\n")
 
-    def value_per_item(self):
-        """
-        Print all the shoes out with an added detail for the value of each shoe.
-
-        Value = Cost * Quantity
-        """
-        print("Value per item for all shoes...")
-        for shoe in self.shoes:
-            value = shoe.value
-            print(shoe, end="")
-            print(f"\tValue:      {value:,}", end="\n\n")
-
     def highest_qty(self):
         """View the highest quantity shoe in the inventory."""
         print("Shoe with the highest quantity in stock...")
@@ -277,8 +264,7 @@ MENU_VIEW_ALL = 1
 MENU_SEARCH = 2
 MENU_INPUT_NEW_SHOE = 3
 MENU_RESTOCK = 4
-MENU_VALUE_PER = 5
-MENU_HIGHEST_QUANTITY = 6
+MENU_HIGHEST_QUANTITY = 5
 
 
 # ==========Main Menu=============
@@ -298,8 +284,7 @@ def main():
     \t2) Search for a shoe in inventory using SKU code
     \t3) Input new shoe detail into inventory
     \t4) Restock the lowest quantity of a shoe in inventory
-    \t5) View value per item for the whole inventory
-    \t6) View highest quantity of a shoe in inventory
+    \t5) View highest quantity of a shoe in inventory
 
     \t0) Quit program
 
@@ -318,8 +303,6 @@ def main():
             inventory.capture_shoes()
         elif user_choice == MENU_RESTOCK:
             inventory.re_stock()
-        elif user_choice == MENU_VALUE_PER:
-            inventory.value_per_item()
         elif user_choice == MENU_HIGHEST_QUANTITY:
             inventory.highest_qty()
         elif user_choice == 0:
