@@ -1,13 +1,13 @@
 # Shoe Inventory Program
 
 A command-line inventory management application built in Python.  
-The program allows users to manage shoe stock data stored in a persistent text file, using a structured, object-oriented approach.
+The program allows users to manage shoe stock data stored in a persistent text file, using a highly structured, object-oriented approach.
 
 ## Overview
 
 This project demonstrates practical use of:
 
-- Object-Oriented Programming (OOP)
+- Object-Oriented Programming (OOP) principles (Encapsulation and Composition)
 - File handling with `pathlib`
 - Exception handling
 - Data validation
@@ -29,11 +29,12 @@ All updates persist to file storage.
 
 ## Technical Highlights
 
-- Clean class-based design (`Shoe` class)
-- Type hints for clarity
-- Input validation for numeric fields
-- Graceful handling of missing or malformed files
-- Structured, readable output formatting
+- **Clean class-based design:** Utilises a `Shoe` class for individual items and an `Inventory` class to manage the collection and file operations.
+- **Dynamic attributes:** Uses the Python `@property` decorator to dynamically calculate shoe values on the fly.
+- **Data Encapsulation:** Centralizes file reading, writing, and error handling entirely within the `Inventory` object.
+- **Type hints:** Ensures code clarity and developer readability.
+- **Input validation:** Safely handles numeric fields and prevents crashes from bad user input.
+- **Graceful error handling:** Detects missing or malformed files and provides clean terminal exits.
 
 ## How to Run
 
